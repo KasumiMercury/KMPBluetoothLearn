@@ -7,3 +7,7 @@ class AndroidPlatform : Platform {
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
+
+class AndroidBluetoothProvider : BluetoothProvider
+
+actual fun getBluetoothProvider(): BluetoothProvider = AndroidBluetoothProvider()

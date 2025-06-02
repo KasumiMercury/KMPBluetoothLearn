@@ -5,3 +5,7 @@ interface Platform {
 }
 
 expect fun getPlatform(): Platform
+
+interface BluetoothProvider {}
+
+expect fun getBluetoothProvider(): BluetoothProvider

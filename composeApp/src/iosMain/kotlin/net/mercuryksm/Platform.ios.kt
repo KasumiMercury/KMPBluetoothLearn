@@ -7,3 +7,7 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+
+class IOSBluetoothProvider : BluetoothProvider
+
+actual fun getBluetoothProvider(): BluetoothProvider = IOSBluetoothProvider()
