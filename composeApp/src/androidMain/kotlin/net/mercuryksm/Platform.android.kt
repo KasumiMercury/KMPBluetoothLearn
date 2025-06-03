@@ -8,6 +8,8 @@ class AndroidPlatform : Platform {
 
 actual fun getPlatform(): Platform = AndroidPlatform()
 
-class AndroidBluetoothProvider : BluetoothProvider
+class AndroidBluetoothProvider : BluetoothProvider {
+    override fun isBluetoothAvailable(): Boolean = true
+}
 
 actual fun getBluetoothProvider(): BluetoothProvider = AndroidBluetoothProvider()

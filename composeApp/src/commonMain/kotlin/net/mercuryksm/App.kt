@@ -17,10 +17,13 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import kmpbluetoothpoc.composeapp.generated.resources.Res
 import kmpbluetoothpoc.composeapp.generated.resources.compose_multiplatform
+import kotlin.time.Clock
 
 @Composable
 @Preview
-fun App() {
+fun App(
+    viewModel: BluetoothViewModel
+) {
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
@@ -29,6 +32,15 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            if (viewModel.showBluetoothButton) {
+                Button(onClick = {
+                    println("Bluetooth button clicked")
+                }){
+                    Text("Bluetooth is available on this device.")
+                }
+            } else {
+                Text("Bluetooth is not available on this device.")
+            }
             Button(onClick = { showContent = !showContent }) {
                 Text("Click me!")
             }

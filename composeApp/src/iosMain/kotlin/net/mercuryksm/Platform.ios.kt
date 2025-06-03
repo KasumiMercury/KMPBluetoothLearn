@@ -8,6 +8,9 @@ class IOSPlatform: Platform {
 
 actual fun getPlatform(): Platform = IOSPlatform()
 
-class IOSBluetoothProvider : BluetoothProvider
+class IOSBluetoothProvider : BluetoothProvider {
+    // this project does not support Bluetooth on iOS
+    override fun isBluetoothAvailable(): Boolean = false
+}
 
 actual fun getBluetoothProvider(): BluetoothProvider = IOSBluetoothProvider()

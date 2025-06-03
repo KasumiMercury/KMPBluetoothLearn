@@ -12,8 +12,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        val bluetoothProvider = getBluetoothProvider()
+        val viewModel = BluetoothViewModel(bluetoothProvider)
+
         setContent {
-            App()
+            App(
+                viewModel = viewModel
+            )
         }
     }
 }
@@ -21,5 +26,7 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+    App(
+        viewModel = BluetoothViewModel(getBluetoothProvider())
+    )
 }
