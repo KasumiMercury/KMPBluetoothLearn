@@ -53,10 +53,11 @@ object ContextHolder {
     }
 }
 
-actual fun getBluetoothProvider(): BluetoothProvider = AndroidBluetoothProvider(
+actual fun getBluetoothProvider(): BluetoothProvider {
+    // TODO: fix
+    println("getBluetoothProvider called")
     if (!ContextHolder.isInitialized) {
         throw IllegalStateException("ContextHolder is not initialized. Call ContextHolder.initialize(context) first.")
-    } else {
-        ContextHolder.context
     }
-)
+    return AndroidBluetoothProvider(ContextHolder.context)
+}

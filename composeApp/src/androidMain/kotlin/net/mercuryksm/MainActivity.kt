@@ -15,6 +15,10 @@ class MainActivity : ComponentActivity() {
         val bluetoothProvider = getBluetoothProvider()
         val viewModel = BluetoothViewModel(bluetoothProvider)
 
+        // TODO: replace this, only for provisional purposes
+        ContextHolder.initialize(applicationContext)
+        println("ContextHolder initialized with context: ${ContextHolder.context}")
+
         setContent {
             App(
                 viewModel = viewModel
