@@ -11,8 +11,8 @@ actual fun getPlatform(): Platform = IOSPlatform()
 class IOSBluetoothProvider : BluetoothProvider {
     // this project does not support Bluetooth on iOS
     override fun isBluetoothAvailable(): Boolean = false
-    override fun scanDevices(): List<String> {
-        throw UnsupportedOperationException("Bluetooth scanning is not supported on iOS")
+    override fun getDeviceName(): String {
+        throw UnsupportedOperationException("Getting device name list is not supported on iOS")
     }
 }
 

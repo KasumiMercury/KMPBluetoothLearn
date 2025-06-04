@@ -24,17 +24,21 @@ class AndroidBluetoothProvider(
     override fun isBluetoothAvailable(): Boolean {
         return bluetoothAdapter?.isEnabled == true
     }
-    override fun scanDevices(): List<String> {
-        val deviceNames = mutableListOf<String>()
+    override fun getDeviceName(): String {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+
             pairedDevices?.forEach { device ->
-                deviceNames.add(device.name ?: "Unknown Device")
+                // TODO: add characteristic UUID check
+                if (device.uuids?.any { it.uuid.toString() == "00001101-0000-1000-8000-00805F9B34FB" } == true) {
+                    return device.name
+                }
             }
         } else {
             throw SecurityException("Bluetooth permission is not granted.")
         }
-        return deviceNames
+
+        throw UnsupportedOperationException("No Bluetooth device found or permission not granted.")
     }
 }
 
