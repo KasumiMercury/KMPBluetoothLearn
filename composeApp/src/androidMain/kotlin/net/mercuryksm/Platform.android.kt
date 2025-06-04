@@ -29,11 +29,14 @@ class AndroidBluetoothProvider(
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
 
             pairedDevices?.forEach { device ->
-                // TODO: add characteristic UUID check
-                if (device.uuids?.any { it.uuid.toString() == "00001101-0000-1000-8000-00805F9B34FB" } == true) {
-                    return device.name
+                // TODO: add characteristics check
+                if (device.uuids?.any { it.uuid.toString() == "00001101-0000-1000-8000-00805F9B34FB" } == false) {
+                    return@forEach
                 }
+
+                return device.name
             }
+
         } else {
             throw SecurityException("Bluetooth permission is not granted.")
         }
