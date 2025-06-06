@@ -34,9 +34,21 @@ fun App(
         ) {
             if (viewModel.showBluetoothButton) {
                 Button(onClick = {
-                    println("Bluetooth button clicked")
-                }){
+                    try {
+                        viewModel.loadDeviceList()
+                    } catch (e: Exception) {
+                        // TODO: improve error display e.g. show a snackbar or dialog
+                        println("Error loading device list: ${e.message}")
+                    }
+                }) {
                     Text("Bluetooth is available on this device.")
+                }
+                if (viewModel.deviceList.isNotEmpty()) {
+                    Column {
+                        for (device in viewModel.deviceList) {
+                            Text("Name: ${device.name}, Address: ${device.address}")
+                        }
+                    }
                 }
             } else {
                 Text("Bluetooth is not available on this device.")
