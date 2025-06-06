@@ -13,7 +13,7 @@ class IOSBluetoothProvider : BluetoothProvider {
     // this project does not support Bluetooth on iOS
     override fun isBluetoothAvailable(): Boolean = false
     override fun getDeviceList(): List<Device> {
-        throw UnsupportedOperationException("Getting device name list is not supported on iOS")
+        throw UnsupportedOperationException("getDeviceList is not supported on iOS")
     }
 }
 
