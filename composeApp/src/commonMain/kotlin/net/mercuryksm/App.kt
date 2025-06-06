@@ -37,6 +37,7 @@ fun App(
                     try {
                         viewModel.loadDeviceList()
                     } catch (e: Exception) {
+                        // TODO: improve error display e.g. show a snackbar or dialog
                         println("Error loading device list: ${e.message}")
                     }
                 }) {
