@@ -34,7 +34,15 @@ fun App(
         ) {
             if (viewModel.showBluetoothButton) {
                 Button(onClick = {
-                    viewModel.loadDeviceList()
+ Button(onClick = {
+     try {
+         viewModel.loadDeviceList()
+     } catch (e: Exception) {
+         // Handle error appropriately, e.g., show toast or error state
+     }
+ }){
+     // ...
+ }
                 }){
                     Text("Bluetooth is available on this device.")
                 }
