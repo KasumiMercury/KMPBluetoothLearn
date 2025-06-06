@@ -19,33 +19,42 @@ actual fun getPlatform(): Platform = AndroidPlatform()
 class AndroidBluetoothProvider(
     private val context: Context
 ) : BluetoothProvider {
-    val bluetoothManager: BluetoothManager? = ContextCompat.getSystemService(context, BluetoothManager::class.java)
-    val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
+    private val bluetoothManager: BluetoothManager? =
+        ContextCompat.getSystemService(context, BluetoothManager::class.java)
+    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
 
     override fun isBluetoothAvailable(): Boolean {
         return bluetoothAdapter?.isEnabled == true
     }
-    override fun getDeviceName(): Device {
-        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
 
-            pairedDevices?.forEach { device ->
-                // TODO: add characteristics check
-                if (device.uuids?.any { it.uuid.toString() == "2c081c6d-61dd-4af8-ac2f-17f2ea5e5214" } == false) {
-                    return@forEach
-                }
+    override fun getDeviceNameList(): List<Device> {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.BLUETOOTH
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
+                throw UnsupportedOperationException("Bluetooth is not enabled or not available.")
+            }
 
-                return Device(
+            val pairedDevices: Set<BluetoothDevice> = bluetoothAdapter.bondedDevices
+            if (pairedDevices.isEmpty()) {
+                return emptyList()
+            }
+
+            val deviceList = pairedDevices.filter {
+                it.uuids?.any { uuid -> uuid.toString() == "2c081c6d-61dd-4af8-ac2f-17f2ea5e5214" } == true
+            }.map { device ->
+                Device(
                     name = device.name ?: "Unknown Device",
                     address = device.address
                 )
             }
 
+            return deviceList
         } else {
             throw SecurityException("Bluetooth permission is not granted.")
         }
-
-        throw UnsupportedOperationException("No Bluetooth device found or permission not granted.")
     }
 }
 
