@@ -27,7 +27,7 @@ class AndroidBluetoothProvider(
         return bluetoothAdapter?.isEnabled == true
     }
 
-    override fun getDeviceNameList(): List<Device> {
+    override fun getDeviceList(): List<Device> {
         if (ContextCompat.checkSelfPermission(
                 context,
                 android.Manifest.permission.BLUETOOTH

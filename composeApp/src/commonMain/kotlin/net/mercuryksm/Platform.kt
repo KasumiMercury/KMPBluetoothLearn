@@ -10,7 +10,7 @@ expect fun getPlatform(): Platform
 
 interface BluetoothProvider {
     fun isBluetoothAvailable(): Boolean
-    fun getDeviceNameList(): List<Device>
+    fun getDeviceList(): List<Device>
 }
 
 expect fun getBluetoothProvider(): BluetoothProvider
