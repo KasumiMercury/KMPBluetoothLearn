@@ -1,5 +1,6 @@
 package net.mercuryksm
 
+import net.mercuryksm.device.Device
 import platform.UIKit.UIDevice
 
 class IOSPlatform: Platform {
@@ -11,7 +12,7 @@ actual fun getPlatform(): Platform = IOSPlatform()
 class IOSBluetoothProvider : BluetoothProvider {
     // this project does not support Bluetooth on iOS
     override fun isBluetoothAvailable(): Boolean = false
-    override fun getDeviceName(): String {
+    override fun getDeviceName(): Device {
         throw UnsupportedOperationException("Getting device name list is not supported on iOS")
     }
 }

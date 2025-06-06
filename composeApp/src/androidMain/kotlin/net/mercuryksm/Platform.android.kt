@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Build
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import net.mercuryksm.device.Device
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -24,17 +25,20 @@ class AndroidBluetoothProvider(
     override fun isBluetoothAvailable(): Boolean {
         return bluetoothAdapter?.isEnabled == true
     }
-    override fun getDeviceName(): String {
+    override fun getDeviceName(): Device {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
 
             pairedDevices?.forEach { device ->
                 // TODO: add characteristics check
-                if (device.uuids?.any { it.uuid.toString() == "00001101-0000-1000-8000-00805F9B34FB" } == false) {
+                if (device.uuids?.any { it.uuid.toString() == "2c081c6d-61dd-4af8-ac2f-17f2ea5e5214" } == false) {
                     return@forEach
                 }
 
-                return device.name
+                return Device(
+                    name = device.name ?: "Unknown Device",
+                    address = device.address
+                )
             }
 
         } else {
