@@ -34,9 +34,16 @@ fun App(
         ) {
             if (viewModel.showBluetoothButton) {
                 Button(onClick = {
-                    println("Bluetooth button clicked")
+                    viewModel.loadDeviceList()
                 }){
                     Text("Bluetooth is available on this device.")
+                }
+                if (viewModel.deviceList.isNotEmpty()) {
+                    Column {
+                        for (device in viewModel.deviceList) {
+                            Text("Name: ${device.name}, Address: ${device.address}")
+                        }
+                    }
                 }
             } else {
                 Text("Bluetooth is not available on this device.")
