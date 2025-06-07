@@ -54,7 +54,7 @@ class AndroidBluetoothProvider(
             }.forEach { device ->
                 val deviceName = device.name ?: "Unknown Device"
 
-                deviceCache[deviceName] = device
+                deviceCache[device.address] = device
 
                 deviceList.add(
                     Device(
@@ -76,7 +76,7 @@ class AndroidBluetoothProvider(
                 android.Manifest.permission.BLUETOOTH_CONNECT
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            val bluetoothDevice = deviceCache[device.name]
+            val bluetoothDevice = deviceCache[device.address]
                 ?: throw IllegalArgumentException("Device not found in cache: ${device.address}")
 
             if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
