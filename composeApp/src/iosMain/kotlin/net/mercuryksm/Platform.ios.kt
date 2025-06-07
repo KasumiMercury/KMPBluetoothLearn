@@ -15,6 +15,12 @@ class IOSBluetoothProvider : BluetoothProvider {
     override fun getDeviceList(): List<Device> {
         throw UnsupportedOperationException("getDeviceList is not supported on iOS")
     }
+    override fun connect(device: Device) {
+        throw UnsupportedOperationException("connect is not supported on iOS")
+    }
+    override fun disconnect() {
+        throw UnsupportedOperationException("disconnect is not supported on iOS")
+    }
 }
 
 actual fun getBluetoothProvider(): BluetoothProvider = IOSBluetoothProvider()
