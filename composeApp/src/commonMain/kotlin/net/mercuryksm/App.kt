@@ -2,6 +2,7 @@ package net.mercuryksm
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,7 +53,9 @@ fun App(
                             ListItem(
                                 headlineContent = { Text("Name: ${device.name}") },
                                 supportingContent = { Text("Address: ${device.address}") },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.connectDevice(device) }
                             )
                         }
                     }

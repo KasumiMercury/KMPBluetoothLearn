@@ -17,4 +17,8 @@ class BluetoothViewModel(
     fun loadDeviceList() {
         deviceList = bluetoothProvider.getDeviceList()
     }
+
+    fun connectDevice(device: Device) {
+        bluetoothProvider.connect(device)
+    }
 }
