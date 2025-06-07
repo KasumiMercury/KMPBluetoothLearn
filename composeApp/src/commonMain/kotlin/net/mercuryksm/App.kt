@@ -55,7 +55,14 @@ fun App(
                                 supportingContent = { Text("Address: ${device.address}") },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { viewModel.connectDevice(device) }
+                                    .clickable {
+                                        try {
+                                            viewModel.connectDevice(device)
+                                        } catch (e: Exception) {
+                                            // TODO: improve error display e.g. show a snackbar or dialog
+                                            println("Error connecting device: ${e.message}")
+                                        }
+                                    }
                             )
                         }
                     }
