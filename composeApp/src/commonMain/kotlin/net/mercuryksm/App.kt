@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -44,9 +47,13 @@ fun App(
                     Text("Bluetooth is available on this device.")
                 }
                 if (viewModel.deviceList.isNotEmpty()) {
-                    Column {
-                        for (device in viewModel.deviceList) {
-                            Text("Name: ${device.name}, Address: ${device.address}")
+                    LazyColumn {
+                        items(viewModel.deviceList) { device ->
+                            ListItem(
+                                headlineContent = { Text("Name: ${device.name}") },
+                                supportingContent = { Text("Address: ${device.address}") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
