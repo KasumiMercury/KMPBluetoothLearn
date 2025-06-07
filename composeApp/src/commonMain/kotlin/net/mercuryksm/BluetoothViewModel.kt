@@ -18,7 +18,23 @@ class BluetoothViewModel(
         deviceList = bluetoothProvider.getDeviceList()
     }
 
+    enum class ConnectionState {
+        CONNECTED, DISCONNECTED, CONNECTING, FAILED
+    }
+
+    var connectionState by mutableStateOf<ConnectionState>(ConnectionState.DISCONNECTED)
+        private set
+
     fun connectDevice(device: Device) {
-        bluetoothProvider.connect(device)
+        if (connectionState == ConnectionState.CONNECTING) return
+
+        connectionState = ConnectionState.CONNECTING
+        try {
+            bluetoothProvider.connect(device)
+            connectionState = ConnectionState.CONNECTED
+        } catch (e: Exception) {
+            connectionState = ConnectionState.FAILED
+            throw e
+        }
     }
 }
