@@ -92,36 +92,32 @@ class AndroidBluetoothProvider(
                 false,
                 object : BluetoothGattCallback() {
                     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-                        val deviceName = if (ContextCompat.checkSelfPermission(
+                        if (ContextCompat.checkSelfPermission(
                                 context,
                                 android.Manifest.permission.BLUETOOTH_CONNECT
-                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
                         ) {
-                            bluetoothDevice.name
-                        } else {
-                            "Unknown Device"
+                            throw SecurityException("Bluetooth connect permission is not granted.")
                         }
                         if (newState == BluetoothProfile.STATE_CONNECTED) {
-                            println("Connected to $deviceName")
+                            println("Connected to ${bluetoothDevice.name}")
                         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                            println("Disconnected from $deviceName")
+                            println("Disconnected from ${bluetoothDevice.name}")
                         }
                     }
 
                     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-                        val deviceName = if (ContextCompat.checkSelfPermission(
+                        if (ContextCompat.checkSelfPermission(
                                 context,
                                 android.Manifest.permission.BLUETOOTH_CONNECT
-                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
                         ) {
-                            bluetoothDevice.name
-                        } else {
-                            "Unknown Device"
+                            throw SecurityException("Bluetooth connect permission is not granted.")
                         }
                         if (status == BluetoothGatt.GATT_SUCCESS) {
-                            println("Services discovered for $deviceName")
+                            println("Services discovered for ${bluetoothDevice.name}")
                         } else {
-                            println("Failed to discover services for $deviceName, status: $status")
+                            println("Failed to discover services for ${bluetoothDevice.name}, status: $status")
                         }
                     }
                 }
