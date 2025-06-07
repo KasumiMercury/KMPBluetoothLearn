@@ -35,7 +35,7 @@ class AndroidBluetoothProvider(
     override fun getDeviceList(): List<Device> {
         if (ContextCompat.checkSelfPermission(
                 context,
-                android.Manifest.permission.BLUETOOTH
+                android.Manifest.permission.BLUETOOTH_CONNECT
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
             if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
