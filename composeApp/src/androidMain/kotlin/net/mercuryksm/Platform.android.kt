@@ -47,19 +47,20 @@ class AndroidBluetoothProvider(
                 return emptyList()
             }
 
-            val filteredDevices = pairedDevices.filter {
+            val deviceList = mutableListOf<Device>()
+
+            pairedDevices.filter {
                 it.uuids?.any { uuid -> uuid.toString() == "2c081c6d-61dd-4af8-ac2f-17f2ea5e5214" } == true
-            }
-
-            filteredDevices.forEach { device ->
+            }.forEach { device ->
                 val deviceName = device.name ?: "Unknown Device"
-                deviceCache[deviceName] = device
-            }
 
-            val deviceList = filteredDevices.map { device ->
-                Device(
-                    name = device.name ?: "Unknown Device",
-                    address = device.address
+                deviceCache[deviceName] = device
+
+                deviceList.add(
+                    Device(
+                        name = deviceName,
+                        address = device.address
+                    )
                 )
             }
 
