@@ -15,7 +15,9 @@ class BluetoothViewModel(
         private set
 
     fun loadDeviceList() {
-        deviceList = bluetoothProvider.getDeviceList()
+        bluetoothProvider.getDeviceList { devices ->
+            deviceList = devices
+        }
     }
 
     enum class ConnectionState {

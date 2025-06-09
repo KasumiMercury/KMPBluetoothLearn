@@ -14,11 +14,8 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.Build
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import java.util.UUID
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 import net.mercuryksm.device.Device
 
 class AndroidPlatform : Platform {
@@ -36,7 +33,7 @@ class AndroidBluetoothProvider(
 
     private val deviceCache = mutableMapOf<String, BluetoothDevice>()
 
-    private val SERVICE_UUID = UUID.fromString("2c081c6d-61dd-4af8-ac2f-17f2ea5e5214")
+    private val serviceUuid = UUID.fromString("2c081c6d-61dd-4af8-ac2f-17f2ea5e5214")
 
     override fun isBluetoothAvailable(): Boolean {
         return bluetoothAdapter?.isEnabled == true
@@ -63,7 +60,7 @@ class AndroidBluetoothProvider(
 
         val foundDevices = mutableMapOf<String, BluetoothDevice>()
         val filter = ScanFilter.Builder()
-            .setServiceUuid(android.os.ParcelUuid(SERVICE_UUID))
+            .setServiceUuid(android.os.ParcelUuid(serviceUuid))
             .build()
         val filters = listOf(filter)
         val settings = ScanSettings.Builder()
