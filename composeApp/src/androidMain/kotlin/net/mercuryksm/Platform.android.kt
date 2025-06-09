@@ -59,13 +59,13 @@ class AndroidBluetoothProvider(
         }
 
         val foundDevices = mutableMapOf<String, BluetoothDevice>()
-        val filter = ScanFilter.Builder()
-            .setServiceUuid(android.os.ParcelUuid(serviceUuid))
-            .build()
-        val filters = listOf(filter)
-        val settings = ScanSettings.Builder()
-            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-            .build()
+//        val filter = ScanFilter.Builder()
+//            .setServiceUuid(android.os.ParcelUuid(serviceUuid))
+//            .build()
+//        val filters = listOf(filter)
+//        val settings = ScanSettings.Builder()
+//            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+//            .build()
 
         val scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -91,7 +91,8 @@ class AndroidBluetoothProvider(
             }
         }
 
-        scanner.startScan(filters, settings, scanCallback)
+//        scanner.startScan(filters, settings, scanCallback)
+        scanner.startScan(scanCallback)
 
         android.os.Handler(context.mainLooper).postDelayed({
             scanner.stopScan(scanCallback)
