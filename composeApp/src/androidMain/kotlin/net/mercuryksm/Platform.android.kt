@@ -7,10 +7,18 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.Build
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import java.util.UUID
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import net.mercuryksm.device.Device
 
 class AndroidPlatform : Platform {
@@ -28,46 +36,76 @@ class AndroidBluetoothProvider(
 
     private val deviceCache = mutableMapOf<String, BluetoothDevice>()
 
+    private val SERVICE_UUID = UUID.fromString("2c081c6d-61dd-4af8-ac2f-17f2ea5e5214")
+
     override fun isBluetoothAvailable(): Boolean {
         return bluetoothAdapter?.isEnabled == true
     }
 
-    override fun getDeviceList(): List<Device> {
+    override fun getDeviceList(callback: (List<Device>) -> Unit) {
         if (ContextCompat.checkSelfPermission(
                 context,
-                android.Manifest.permission.BLUETOOTH_CONNECT
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                android.Manifest.permission.BLUETOOTH_SCAN
+            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
-                throw UnsupportedOperationException("Bluetooth is not enabled or not available.")
-            }
-
-            val pairedDevices: Set<BluetoothDevice> = bluetoothAdapter.bondedDevices
-            if (pairedDevices.isEmpty()) {
-                return emptyList()
-            }
-
-            val deviceList = mutableListOf<Device>()
-
-            pairedDevices.filter {
-                it.uuids?.any { uuid -> uuid.toString() == "2c081c6d-61dd-4af8-ac2f-17f2ea5e5214" } == true
-            }.forEach { device ->
-                val deviceName = device.name ?: "Unknown Device"
-
-                deviceCache[device.address] = device
-
-                deviceList.add(
-                    Device(
-                        name = deviceName,
-                        address = device.address
-                    )
-                )
-            }
-
-            return deviceList
-        } else {
             throw SecurityException("Bluetooth permission is not granted.")
         }
+
+        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
+            throw UnsupportedOperationException("Bluetooth is not enabled or not available.")
+        }
+
+        val scanner: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
+        if (scanner == null) {
+            callback(emptyList())
+            return
+        }
+
+        val foundDevices = mutableMapOf<String, BluetoothDevice>()
+        val filter = ScanFilter.Builder()
+            .setServiceUuid(android.os.ParcelUuid(SERVICE_UUID))
+            .build()
+        val filters = listOf(filter)
+        val settings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build()
+
+        val scanCallback = object : ScanCallback() {
+            override fun onScanResult(callbackType: Int, result: ScanResult) {
+                val device = result.device
+                if (!foundDevices.containsKey(device.address)) {
+                    foundDevices[device.address] = device
+                    deviceCache[device.address] = device
+                }
+            }
+
+            override fun onBatchScanResults(results: List<ScanResult>) {
+                for (result in results) {
+                    val device = result.device
+                    if (!foundDevices.containsKey(device.address)) {
+                        foundDevices[device.address] = device
+                        deviceCache[device.address] = device
+                    }
+                }
+            }
+
+            override fun onScanFailed(errorCode: Int) {
+                callback(emptyList())
+            }
+        }
+
+        scanner.startScan(filters, settings, scanCallback)
+
+        android.os.Handler(context.mainLooper).postDelayed({
+            scanner.stopScan(scanCallback)
+            val deviceList = foundDevices.values.map { device ->
+                Device(
+                    name = device.name ?: "Unknown Device",
+                    address = device.address
+                )
+            }
+            callback(deviceList)
+        }, 3000)
     }
 
     override fun connect(device: Device) {
