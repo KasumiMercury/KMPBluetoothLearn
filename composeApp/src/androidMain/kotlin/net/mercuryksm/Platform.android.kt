@@ -41,6 +41,7 @@ class AndroidBluetoothProvider(
 
     private val deviceCache = mutableMapOf<String, BluetoothDevice>()
 
+    // TODO: provide a way to configure this UUID
     private val serviceUuid = UUID.fromString("2c081c6d-61dd-4af8-ac2f-17f2ea5e5214")
 
     private var activeScanner: BluetoothLeScanner? = null
@@ -201,6 +202,8 @@ class AndroidBluetoothProvider(
             callback(deviceList)
         }
 
+        // TODO: provide a way to configure this delay
+        // TODO: display real-time scan results
         handler.postDelayed(scanRunnable!!, 3000)
     }
 
