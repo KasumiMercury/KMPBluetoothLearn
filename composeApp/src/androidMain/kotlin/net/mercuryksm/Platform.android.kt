@@ -44,6 +44,9 @@ class AndroidBluetoothProvider(
     private var activeScanner: BluetoothLeScanner? = null
     private var activeScanCallback: ScanCallback? = null
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var scanRunnable: Runnable? = null
+
     override fun isBluetoothAvailable(): Boolean {
         return bluetoothAdapter?.isEnabled == true
     }
@@ -163,9 +166,13 @@ class AndroidBluetoothProvider(
             scanCallback
         )
 
-        Handler(Looper.getMainLooper()).postDelayed({
+        scanRunnable = Runnable {
             Log.d(tag, "Stopping Bluetooth scan after 3 seconds...")
             scanner.stopScan(scanCallback)
+
+            activeScanner = null
+            activeScanCallback = null
+
             val deviceList = foundDevices.values.map { device ->
                 Device(
                     name = device.name ?: "Unknown Device",
@@ -174,7 +181,9 @@ class AndroidBluetoothProvider(
             }
             Log.d(tag, "Scan completed. Found ${deviceList.size} devices.")
             callback(deviceList)
-        }, 3000)
+        }
+
+        handler.postDelayed(scanRunnable!!, 3000)
     }
 
     override fun connect(device: Device) {
