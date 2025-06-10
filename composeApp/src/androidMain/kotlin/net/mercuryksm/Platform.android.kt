@@ -13,7 +13,11 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import androidx.core.content.ContextCompat
 import java.util.UUID
 import net.mercuryksm.device.Device
@@ -40,12 +44,23 @@ class AndroidBluetoothProvider(
     }
 
     override fun getDeviceList(callback: (List<Device>) -> Unit) {
+        val tag = "AndroidBluetoothProvider"
+
         if (ContextCompat.checkSelfPermission(
                 context,
                 android.Manifest.permission.BLUETOOTH_SCAN
-            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            throw SecurityException("Bluetooth permission is not granted.")
+            Log.e(tag, "BLUETOOTH_SCAN permission is not granted.")
+            throw SecurityException("Bluetooth scan permission is not granted.")
+        }
+
+        if (ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.w(tag, "BLUETOOTH_CONNECT permission is not granted. Device names may not be available.")
         }
 
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
@@ -54,32 +69,42 @@ class AndroidBluetoothProvider(
 
         val scanner: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
         if (scanner == null) {
+            Log.e(tag, "BluetoothLeScanner is not available.")
             callback(emptyList())
             return
         }
 
+        val settings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build()
+
+        val filters = mutableListOf<ScanFilter>()
+        val serviceFilter = ScanFilter.Builder()
+            .setServiceUuid(android.os.ParcelUuid(serviceUuid))
+            .build()
+        filters.add(serviceFilter)
+
         val foundDevices = mutableMapOf<String, BluetoothDevice>()
-//        val filter = ScanFilter.Builder()
-//            .setServiceUuid(android.os.ParcelUuid(serviceUuid))
-//            .build()
-//        val filters = listOf(filter)
-//        val settings = ScanSettings.Builder()
-//            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-//            .build()
+
 
         val scanCallback = object : ScanCallback() {
+            @SuppressLint("MissingPermission")
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 val device = result.device
+                Log.d(tag, "onScanResult: Found device -> Name: ${device.name ?: "N/A"}, Address: ${device.address}, RSSI: ${result.rssi}")
                 if (!foundDevices.containsKey(device.address)) {
                     foundDevices[device.address] = device
                     deviceCache[device.address] = device
                 }
             }
 
+            @SuppressLint("MissingPermission")
             override fun onBatchScanResults(results: List<ScanResult>) {
+                Log.d(tag, "onBatchScanResults: ${results.size} results")
                 for (result in results) {
                     val device = result.device
                     if (!foundDevices.containsKey(device.address)) {
+                        Log.d(tag, "onBatchScanResults: Found device -> Name: ${device.name ?: "N/A"}, Address: ${device.address}")
                         foundDevices[device.address] = device
                         deviceCache[device.address] = device
                     }
@@ -87,14 +112,27 @@ class AndroidBluetoothProvider(
             }
 
             override fun onScanFailed(errorCode: Int) {
+                val errorMessage = when (errorCode) {
+                    SCAN_FAILED_ALREADY_STARTED -> "Scan already started"
+                    SCAN_FAILED_APPLICATION_REGISTRATION_FAILED -> "Application registration failed"
+                    SCAN_FAILED_INTERNAL_ERROR -> "Internal error"
+                    SCAN_FAILED_FEATURE_UNSUPPORTED -> "Feature unsupported"
+                    else -> "Unknown error"
+                }
+                Log.e(tag, "Scan failed with error code: $errorCode - $errorMessage")
                 callback(emptyList())
             }
         }
 
-//        scanner.startScan(filters, settings, scanCallback)
-        scanner.startScan(scanCallback)
+        Log.d(tag, "Starting Bluetooth scan...")
+        scanner.startScan(
+            filters,
+            settings,
+            scanCallback
+        )
 
-        android.os.Handler(context.mainLooper).postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
+            Log.d(tag, "Stopping Bluetooth scan after 3 seconds...")
             scanner.stopScan(scanCallback)
             val deviceList = foundDevices.values.map { device ->
                 Device(
@@ -102,6 +140,7 @@ class AndroidBluetoothProvider(
                     address = device.address
                 )
             }
+            Log.d(tag, "Scan completed. Found ${deviceList.size} devices.")
             callback(deviceList)
         }, 3000)
     }
