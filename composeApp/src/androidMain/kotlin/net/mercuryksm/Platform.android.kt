@@ -158,10 +158,6 @@ class AndroidBluetoothProvider(
                 throw UnsupportedOperationException("Bluetooth is not enabled or not available.")
             }
 
-            if (bluetoothDevice.bondState != BluetoothDevice.BOND_BONDED) {
-                throw IllegalStateException("Device is not bonded: ${bluetoothDevice.name}")
-            }
-
             bluetoothDevice.connectGatt(
                 context,
                 false,
