@@ -3,6 +3,9 @@ package net.mercuryksm
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.mercuryksm.device.Device
 
 class BluetoothViewModel(
@@ -15,7 +18,11 @@ class BluetoothViewModel(
         private set
 
     fun loadDeviceList() {
-        deviceList = bluetoothProvider.getDeviceList()
+        bluetoothProvider.getDeviceList { devices ->
+            CoroutineScope(Dispatchers.Main).launch {
+                deviceList = devices
+            }
+        }
     }
 
     enum class ConnectionState {
