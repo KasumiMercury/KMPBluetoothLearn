@@ -1,5 +1,6 @@
 package net.mercuryksm
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -18,6 +19,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.UUID
 import net.mercuryksm.device.Device
@@ -39,12 +41,32 @@ class AndroidBluetoothProvider(
 
     private val serviceUuid = UUID.fromString("2c081c6d-61dd-4af8-ac2f-17f2ea5e5214")
 
+    private var activeScanner: BluetoothLeScanner? = null
+    private var activeScanCallback: ScanCallback? = null
+
     override fun isBluetoothAvailable(): Boolean {
         return bluetoothAdapter?.isEnabled == true
     }
 
+    private fun stopActiveScan() {
+        activeScanCallback?.let { callback ->
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return
+            }
+            activeScanner?.stopScan(callback)
+        }
+        activeScanner = null
+        activeScanCallback = null
+    }
+
     override fun getDeviceList(callback: (List<Device>) -> Unit) {
         val tag = "AndroidBluetoothProvider"
+
+        stopActiveScan()
 
         if (ContextCompat.checkSelfPermission(
                 context,
@@ -52,7 +74,8 @@ class AndroidBluetoothProvider(
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             Log.e(tag, "BLUETOOTH_SCAN permission is not granted.")
-            throw SecurityException("Bluetooth scan permission is not granted.")
+            callback(emptyList())
+            return
         }
 
         if (ContextCompat.checkSelfPermission(
@@ -91,7 +114,10 @@ class AndroidBluetoothProvider(
             @SuppressLint("MissingPermission")
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 val device = result.device
-                Log.d(tag, "onScanResult: Found device -> Name: ${device.name ?: "N/A"}, Address: ${device.address}, RSSI: ${result.rssi}")
+                Log.d(
+                    tag,
+                    "onScanResult: Found device -> Name: ${device.name ?: "N/A"}, Address: ${device.address}, RSSI: ${result.rssi}"
+                )
                 if (!foundDevices.containsKey(device.address)) {
                     foundDevices[device.address] = device
                     deviceCache[device.address] = device
@@ -104,7 +130,10 @@ class AndroidBluetoothProvider(
                 for (result in results) {
                     val device = result.device
                     if (!foundDevices.containsKey(device.address)) {
-                        Log.d(tag, "onBatchScanResults: Found device -> Name: ${device.name ?: "N/A"}, Address: ${device.address}")
+                        Log.d(
+                            tag,
+                            "onBatchScanResults: Found device -> Name: ${device.name ?: "N/A"}, Address: ${device.address}"
+                        )
                         foundDevices[device.address] = device
                         deviceCache[device.address] = device
                     }
@@ -123,6 +152,9 @@ class AndroidBluetoothProvider(
                 callback(emptyList())
             }
         }
+
+        activeScanner = scanner
+        activeScanCallback = scanCallback
 
         Log.d(tag, "Starting Bluetooth scan...")
         scanner.startScan(
