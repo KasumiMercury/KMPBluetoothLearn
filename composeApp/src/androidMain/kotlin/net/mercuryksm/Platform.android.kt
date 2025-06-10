@@ -54,15 +54,12 @@ class AndroidBluetoothProvider(
     }
 
     private fun stopActiveScan() {
-        activeScanCallback?.let { callback ->
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.BLUETOOTH_SCAN
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return
-            }
-            activeScanner?.stopScan(callback)
+        try {
+            activeScanner?.stopScan(activeScanCallback ?: return)
+        } catch (e: SecurityException) {
+            Log.w(tag, "Failed to stop scan due to security exception", e)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to stop scan", e)
         }
         activeScanner = null
         activeScanCallback = null
