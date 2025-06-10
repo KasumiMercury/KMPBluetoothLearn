@@ -33,6 +33,8 @@ actual fun getPlatform(): Platform = AndroidPlatform()
 class AndroidBluetoothProvider(
     private val context: Context
 ) : BluetoothProvider {
+    private val tag = "AndroidBluetoothProvider"
+
     private val bluetoothManager: BluetoothManager? =
         ContextCompat.getSystemService(context, BluetoothManager::class.java)
     private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
@@ -66,8 +68,21 @@ class AndroidBluetoothProvider(
         activeScanCallback = null
     }
 
+    fun cleanup() {
+        scanRunnable?.let { handler.removeCallbacks(it) }
+        activeScanCallback?.let {
+            try {
+                activeScanner?.stopScan(it)
+            } catch (e: SecurityException) {
+                Log.w(tag, "Failed to stop scan on cleanup", e)
+            }
+        }
+        activeScanner = null
+        activeScanCallback = null
+        scanRunnable = null
+    }
+
     override fun getDeviceList(callback: (List<Device>) -> Unit) {
-        val tag = "AndroidBluetoothProvider"
 
         stopActiveScan()
 
@@ -168,7 +183,13 @@ class AndroidBluetoothProvider(
 
         scanRunnable = Runnable {
             Log.d(tag, "Stopping Bluetooth scan after 3 seconds...")
-            scanner.stopScan(scanCallback)
+            try {
+                scanner.stopScan(scanCallback)
+            } catch (e: SecurityException) {
+                Log.w(tag, "Failed to stop scan due to security exception", e)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to stop scan", e)
+            }
 
             activeScanner = null
             activeScanCallback = null
