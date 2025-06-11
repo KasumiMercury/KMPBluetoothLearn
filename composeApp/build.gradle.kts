@@ -47,6 +47,24 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+
+        androidInstrumentedTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation("io.mockk:mockk-android:1.13.11")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+        }
+
+//        val androidUnitTest by getting {
+//            dependencies {
+//                implementation(libs.kotlin.test)
+//                implementation("io.mockk:mockk:1.13.11")
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+//            }
+//        }
     }
 }
 
