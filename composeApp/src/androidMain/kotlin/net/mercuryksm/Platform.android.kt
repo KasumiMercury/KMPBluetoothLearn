@@ -31,7 +31,6 @@ actual fun getPlatform(): Platform = AndroidPlatform()
 class AndroidBluetoothProvider(
     private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter?,
-    private val bluetoothLeScanner: BluetoothLeScanner?
 ) : BluetoothProvider {
     private val tag = "AndroidBluetoothProvider"
 
@@ -286,11 +285,9 @@ actual fun getBluetoothProvider(): BluetoothProvider {
     val bluetoothManager: BluetoothManager? =
         ContextCompat.getSystemService(context, BluetoothManager::class.java)
     val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
-    val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
 
     return AndroidBluetoothProvider(
         context.applicationContext,
         bluetoothAdapter,
-        bluetoothLeScanner
     )
 }
