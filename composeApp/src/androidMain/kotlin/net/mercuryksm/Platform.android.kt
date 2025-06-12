@@ -277,11 +277,11 @@ object ContextHolder {
 }
 
 actual fun getBluetoothProvider(): BluetoothProvider {
-    val context = ContextHolder.context
-
     if (!ContextHolder.isInitialized) {
         throw IllegalStateException("ContextHolder is not initialized. Call ContextHolder.initialize(context) first.")
     }
+
+    val context = ContextHolder.context
 
     val bluetoothManager: BluetoothManager? =
         ContextCompat.getSystemService(context, BluetoothManager::class.java)
