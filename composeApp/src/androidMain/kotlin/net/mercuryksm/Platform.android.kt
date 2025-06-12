@@ -42,7 +42,8 @@ class AndroidBluetoothProvider(
     private var activeScanner: BluetoothLeScanner? = null
     private var activeScanCallback: ScanCallback? = null
 
-    private val handler = Handler(Looper.getMainLooper())
+    // TODO: test this with private val handler
+    val handler = Handler(Looper.getMainLooper())
     private var scanRunnable: Runnable? = null
 
     override fun isBluetoothAvailable(): Boolean {
