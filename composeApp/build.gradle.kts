@@ -47,6 +47,27 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+
+        androidInstrumentedTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation("io.mockk:mockk-android:1.13.11")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+
+            implementation("androidx.test.ext:junit:1.1.5")
+            implementation("androidx.test:runner:1.5.2")
+        }
+
+//        val androidUnitTest by getting {
+//            dependencies {
+//                implementation(libs.kotlin.test)
+//                implementation("io.mockk:mockk:1.13.11")
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+//            }
+//        }
     }
 }
 
@@ -60,10 +81,15 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
+            excludes += "META-INF/NOTICE.md"
         }
     }
     buildTypes {

@@ -29,13 +29,10 @@ class AndroidPlatform : Platform {
 actual fun getPlatform(): Platform = AndroidPlatform()
 
 class AndroidBluetoothProvider(
-    private val context: Context
+    private val context: Context,
+    private val bluetoothAdapter: BluetoothAdapter?,
 ) : BluetoothProvider {
     private val tag = "AndroidBluetoothProvider"
-
-    private val bluetoothManager: BluetoothManager? =
-        ContextCompat.getSystemService(context, BluetoothManager::class.java)
-    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
 
     private val deviceCache = mutableMapOf<String, BluetoothDevice>()
 
@@ -45,7 +42,8 @@ class AndroidBluetoothProvider(
     private var activeScanner: BluetoothLeScanner? = null
     private var activeScanCallback: ScanCallback? = null
 
-    private val handler = Handler(Looper.getMainLooper())
+    // TODO: test this with private val handler
+    val handler = Handler(Looper.getMainLooper())
     private var scanRunnable: Runnable? = null
 
     override fun isBluetoothAvailable(): Boolean {
@@ -209,7 +207,7 @@ class AndroidBluetoothProvider(
         if (ContextCompat.checkSelfPermission(
                 context,
                 android.Manifest.permission.BLUETOOTH_CONNECT
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
             val bluetoothDevice = deviceCache[device.address]
                 ?: throw IllegalArgumentException("Device not found in cache: ${device.address}")
@@ -226,7 +224,7 @@ class AndroidBluetoothProvider(
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 android.Manifest.permission.BLUETOOTH_CONNECT
-                            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                            ) != PackageManager.PERMISSION_GRANTED
                         ) {
                             throw SecurityException("Bluetooth connect permission is not granted.")
                         }
@@ -241,7 +239,7 @@ class AndroidBluetoothProvider(
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 android.Manifest.permission.BLUETOOTH_CONNECT
-                            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                            ) != PackageManager.PERMISSION_GRANTED
                         ) {
                             throw SecurityException("Bluetooth connect permission is not granted.")
                         }
@@ -279,10 +277,18 @@ object ContextHolder {
 }
 
 actual fun getBluetoothProvider(): BluetoothProvider {
-    // TODO: fix
-    println("getBluetoothProvider called")
+    val context = ContextHolder.context
+
     if (!ContextHolder.isInitialized) {
         throw IllegalStateException("ContextHolder is not initialized. Call ContextHolder.initialize(context) first.")
     }
-    return AndroidBluetoothProvider(ContextHolder.context)
+
+    val bluetoothManager: BluetoothManager? =
+        ContextCompat.getSystemService(context, BluetoothManager::class.java)
+    val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
+
+    return AndroidBluetoothProvider(
+        context.applicationContext,
+        bluetoothAdapter,
+    )
 }
